@@ -399,6 +399,27 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 			}
 
 			//
+			// Verify kernel module versioning
+			//
+			char v[SCAP_PROBE_VERSION_SIZE];
+			memset(v, 0, SCAP_PROBE_VERSION_SIZE);
+			if(ioctl(handle->m_devs[0].m_fd, PPM_IOCTL_GET_PROBE_VERSION, v))
+			{
+				snprintf(error, SCAP_LASTERR_SIZE, "Unable to determine kernel module version");
+				scap_close(handle);
+				*rc = SCAP_FAILURE;
+				return NULL;
+			}
+
+			if(strncmp(PROBE_VERSION, v, SCAP_PROBE_VERSION_SIZE))
+			{
+				snprintf(error, SCAP_LASTERR_SIZE, "Running probe version %s, expected %s.", v, PROBE_VERSION);
+				scap_close(handle);
+				*rc = SCAP_FAILURE;
+				return NULL;
+			}
+
+			//
 			// Map the ring buffer
 			//
 			handle->m_devs[j].m_buffer = (char*)mmap(0,
