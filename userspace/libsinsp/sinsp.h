@@ -45,7 +45,7 @@ limitations under the License.
 #include "container_engine/wmi_handle_source.h"
 
 #ifdef _WIN32
-#pragma warning(disable: 4251 4200 4221 4190)
+#pragma warning(disable : 4251 4200 4221 4190)
 #else
 #include "tbb/concurrent_queue.h"
 #endif
@@ -118,13 +118,15 @@ class sinsp_plugin;
 #if defined(HAS_CAPTURE) && !defined(_WIN32)
 class sinsp_ssl;
 class sinsp_bearer_token;
-template <class T> class socket_data_handler;
-template <class T> class socket_collector;
+template<class T>
+class socket_data_handler;
+template<class T>
+class socket_collector;
 class k8s_handler;
 class k8s_api_handler;
 #endif // HAS_CAPTURE
 
-std::vector<std::string> sinsp_split(const std::string &s, char delim);
+std::vector<std::string> sinsp_split(const std::string& s, char delim);
 
 /*!
   \brief Information about a group of filter/formatting fields.
@@ -134,9 +136,9 @@ class filter_check_info
 public:
 	enum flags
 	{
-		FL_NONE =   0,
-		FL_WORKS_ON_THREAD_TABLE = (1 << 0),	///< This filter check class supports filtering incomplete events that contain only valid thread info and FD info.
-		FL_HIDDEN = (1 << 1),	///< This filter check class won't be shown by fields/filter listings.
+		FL_NONE = 0,
+		FL_WORKS_ON_THREAD_TABLE = (1 << 0), ///< This filter check class supports filtering incomplete events that contain only valid thread info and FD info.
+		FL_HIDDEN = (1 << 1),		     ///< This filter check class won't be shown by fields/filter listings.
 	};
 
 	filter_check_info()
@@ -144,10 +146,10 @@ public:
 		m_flags = 0;
 	}
 
-	string m_name; ///< Field class name.
-	string m_shortdesc; ///< short (< 10 words) description of this filtercheck. Can be blank.
-	string m_desc; ///< Field class description.
-	int32_t m_nfields; ///< Number of fields in this field group.
+	string m_name;				///< Field class name.
+	string m_shortdesc;			///< short (< 10 words) description of this filtercheck. Can be blank.
+	string m_desc;				///< Field class description.
+	int32_t m_nfields;			///< Number of fields in this field group.
 	const filtercheck_field_info* m_fields; ///< Array containing m_nfields field descriptions.
 	uint32_t m_flags;
 };
@@ -212,9 +214,9 @@ public:
 	typedef std::shared_ptr<k8s_ext_list_t> k8s_ext_list_ptr_t;
 
 	sinsp(bool static_container = false,
-		  const std::string static_id = "",
-		  const std::string static_name = "",
-		  const std::string static_image = "");
+	      const std::string static_id = "",
+	      const std::string static_name = "",
+	      const std::string static_image = "");
 	virtual ~sinsp();
 
 	/*!
@@ -226,7 +228,7 @@ public:
 	  @throws a sinsp_exception containing the error string is thrown in case
 	   of failure.
 	*/
-	virtual void open(uint32_t timeout_ms = SCAP_TIMEOUT_MS);
+	virtual void open(uint32_t timeout_ms = SCAP_TIMEOUT_MS, char* arg_driver_name = NULL);
 
 	/*!
 	  \brief Start an event capture from a trace file.
@@ -236,7 +238,7 @@ public:
 	  @throws a sinsp_exception containing the error string is thrown in case
 	   of failure.
 	*/
-	void open(const std::string &filename);
+	void open(const std::string& filename);
 
 	/*!
 	  \brief Start an event capture from a file descriptor.
@@ -271,7 +273,7 @@ public:
 	  \note: the returned event can be considered valid only until the next
 	   call to \ref)
 	*/
-	virtual int32_t next(OUT sinsp_evt **evt);
+	virtual int32_t next(OUT sinsp_evt** evt);
 
 	/*!
 	  \brief Get the maximum number of bytes currently in use by any CPU buffer
@@ -365,7 +367,7 @@ public:
 	*/
 	const string get_filter();
 
-	bool run_filters_on_evt(sinsp_evt *evt);
+	bool run_filters_on_evt(sinsp_evt* evt);
 
 	/*!
 	  \brief This method can be used to specify a function to collect the library
@@ -413,7 +415,6 @@ public:
 	 */
 	void set_thread_timeout_s(uint32_t val);
 
-
 	/*!
 	  \brief Start writing the captured events to file.
 
@@ -433,7 +434,7 @@ public:
 	*/
 	void autodump_start(const string& dump_filename, bool compress);
 
- 	/*!
+	/*!
 	  \brief Cycles the file pointer to a new capture file
 	*/
 	void autodump_next_file();
@@ -547,10 +548,10 @@ public:
 	libsinsp::event_processor* m_external_event_processor;
 
 	sinsp_threadinfo* build_threadinfo()
-    {
-        return m_external_event_processor ? m_external_event_processor->build_threadinfo(this)
-                                          : new sinsp_threadinfo(this);
-    }
+	{
+		return m_external_event_processor ? m_external_event_processor->build_threadinfo(this)
+						  : new sinsp_threadinfo(this);
+	}
 
 	/*!
 	  \brief registers external event processor.
@@ -642,7 +643,7 @@ public:
 	/*!
 	  \brief Returns the framework plugin api version as a string with static storage
 	*/
-	inline const char *get_plugin_api_version() const
+	inline const char* get_plugin_api_version() const
 	{
 		return PLUGIN_API_VERSION_STR;
 	}
@@ -772,7 +773,6 @@ public:
 	*/
 	void set_print_container_data(bool print_container_data);
 
-
 	/*!
 	  \brief Returns true if the command line argument is set to show container information.
 	*/
@@ -860,12 +860,11 @@ public:
 	  like Kuberneted and mesos.
 	*/
 	void set_metadata_download_params(uint32_t data_max_b,
-		uint32_t data_chunk_wait_us,
-		uint32_t data_watch_freq_sec);
-
+					  uint32_t data_chunk_wait_us,
+					  uint32_t data_watch_freq_sec);
 
 #if !defined(CYGWING_AGENT) && !defined(MINIMAL_BUILD)
-	void init_k8s_ssl(const std::string *ssl_cert);
+	void init_k8s_ssl(const std::string* ssl_cert);
 
 	/*!
 	  \brief Initialize the Kubernetes client.
@@ -874,7 +873,7 @@ public:
 	  \param node_name the node name is used as a filter when requesting metadata of pods 
 	  to the API server; if empty, no filter is set
 	*/
-	void init_k8s_client(std::string* api_server, std::string* ssl_cert, std::string *node_name, bool verbose = false);
+	void init_k8s_client(std::string* api_server, std::string* ssl_cert, std::string* node_name, bool verbose = false);
 	void make_k8s_client();
 	k8s* get_k8s_client() const { return m_k8s_client; }
 	void validate_k8s_node_name();
@@ -889,7 +888,7 @@ public:
 	void stop_dropping_mode();
 	void start_dropping_mode(uint32_t sampling_ratio);
 	void on_new_entry_from_proc(void* context, scap_t* handle, int64_t tid, scap_threadinfo* tinfo,
-		scap_fdinfo* fdinfo);
+				    scap_fdinfo* fdinfo);
 	void set_get_procs_cpu_from_driver(bool get_procs_cpu_from_driver)
 	{
 		m_get_procs_cpu_from_driver = get_procs_cpu_from_driver;
@@ -922,7 +921,7 @@ public:
 
 	bool setup_cycle_writer(std::string base_file_name, int rollover_mb, int duration_seconds, int file_limit, unsigned long event_limit, bool compress);
 	void import_ipv4_interface(const sinsp_ipv4_ifinfo& ifinfo);
-	void add_meta_event(sinsp_evt *metaevt);
+	void add_meta_event(sinsp_evt* metaevt);
 	void add_meta_event_callback(meta_event_callback cback, void* data);
 	void remove_meta_event_callback();
 	void filter_proc_table_when_saving(bool filter);
@@ -933,7 +932,8 @@ public:
 		return scap_ftell(m_h);
 	}
 	void refresh_ifaddr_list();
-	void refresh_proc_list() {
+	void refresh_proc_list()
+	{
 		scap_refresh_proc_table(m_h);
 	}
 	void set_simpledriver_mode();
@@ -958,19 +958,19 @@ public:
 	{
 		enum ppm_event_flags flags = g_infotables.m_event_info[etype].flags;
 
-		return ! (flags & sinsp::simple_consumer_skip_flags());
+		return !(flags & sinsp::simple_consumer_skip_flags());
 	}
 
 	static inline bool simple_consumer_consider_syscallid(uint16_t scid)
 	{
 		enum ppm_event_flags flags = g_infotables.m_syscall_info_table[scid].flags;
 
-		return ! (flags & sinsp::simple_consumer_skip_flags());
+		return !(flags & sinsp::simple_consumer_skip_flags());
 	}
 
 	// Add comm to the list of comms for which the inspector
 	// should not return events.
-	bool suppress_events_comm(const std::string &comm);
+	bool suppress_events_comm(const std::string& comm);
 
 	bool check_suppressed(int64_t tid);
 
@@ -990,7 +990,7 @@ public:
 	/*!
 	  \brief Pushed a new path to the list of crio socket paths
 	*/
-	void add_cri_socket_path(const std::string &path);
+	void add_cri_socket_path(const std::string& path);
 	void set_cri_timeout(int64_t timeout_ms);
 	void set_cri_async(bool async);
 	void set_cri_delay(uint64_t delay_ms);
@@ -1000,39 +1000,39 @@ public:
 	void set_input_plugin(string plugin_name);
 	void set_input_plugin_open_params(string params);
 	const std::vector<std::shared_ptr<sinsp_plugin>>& get_plugins();
-	std::shared_ptr<sinsp_plugin> get_plugin_by_evt(sinsp_evt &evt);
+	std::shared_ptr<sinsp_plugin> get_plugin_by_evt(sinsp_evt& evt);
 	std::shared_ptr<sinsp_plugin> get_plugin_by_id(uint32_t plugin_id);
-	std::shared_ptr<sinsp_plugin> get_source_plugin_by_source(const std::string &source);
+	std::shared_ptr<sinsp_plugin> get_source_plugin_by_source(const std::string& source);
 
 	uint64_t get_lastevent_ts() const { return m_lastevent_ts; }
 
-VISIBILITY_PROTECTED
-	bool add_thread(const sinsp_threadinfo *ptinfo);
+	VISIBILITY_PROTECTED
+	bool add_thread(const sinsp_threadinfo* ptinfo);
 	void set_mode(scap_mode_t value)
 	{
 		m_mode = value;
 	}
 
-VISIBILITY_PRIVATE
+	VISIBILITY_PRIVATE
 
-        static inline ppm_event_flags simple_consumer_skip_flags()
-        {
-		return (ppm_event_flags) (EF_SKIPPARSERESET | EF_UNUSED | EF_DROP_SIMPLE_CONS | EF_OLD_VERSION);
-        }
+	static inline ppm_event_flags simple_consumer_skip_flags()
+	{
+		return (ppm_event_flags)(EF_SKIPPARSERESET | EF_UNUSED | EF_DROP_SIMPLE_CONS | EF_OLD_VERSION);
+	}
 // Doxygen doesn't understand VISIBILITY_PRIVATE
 #ifdef _DOXYGEN
 private:
 #endif
 
 	void open_int();
-	void open_live_common(uint32_t timeout_ms, scap_mode_t mode);
+	void open_live_common(uint32_t timeout_ms, scap_mode_t mode, char* driver_name);
 	void init();
 	void deinit_state();
 	void import_thread_table();
 	void import_ifaddr_list();
 	void import_user_list();
 	void add_protodecoders();
-	void fill_syscalls_of_interest(scap_open_args *oargs);
+	void fill_syscalls_of_interest(scap_open_args* oargs);
 	void remove_thread(int64_t tid, bool force);
 
 	//
@@ -1058,7 +1058,7 @@ private:
 	bool get_mesos_data();
 #endif // !defined(CYGWING_AGENT) && !defined(MINIMAL_BUILD)
 
-	static int64_t get_file_size(const std::string& fname, char *error);
+	static int64_t get_file_size(const std::string& fname, char* error);
 	static std::string get_error_desc(const std::string& msg = "");
 
 	void restart_capture();
@@ -1068,7 +1068,7 @@ private:
 		scap_fseek(m_h, filepos);
 	}
 
-	void add_suppressed_comms(scap_open_args &oargs);
+	void add_suppressed_comms(scap_open_args& oargs);
 
 	bool increased_snaplen_port_range_set() const
 	{
@@ -1309,7 +1309,7 @@ public:
 	// If non-null, sinsp::next will use this pointer instead of invoking scap_next().
 	// After using this event, sinsp::next() will set this back to NULL.
 	// This is used internally during the state initialization phase.
-	scap_evt *m_replay_scap_evt;
+	scap_evt* m_replay_scap_evt;
 	//
 	// This is related to m_replay_scap_evt, and is used to store the additional cpuid
 	// information of the replayed scap event.
@@ -1345,7 +1345,8 @@ public:
 	friend class sinsp_network_interfaces;
 	friend class test_helper;
 
-	template<class TKey,class THash,class TCompare> friend class sinsp_connection_manager;
+	template<class TKey, class THash, class TCompare>
+	friend class sinsp_connection_manager;
 };
 
 /*@}*/

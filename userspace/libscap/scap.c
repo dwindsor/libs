@@ -136,11 +136,16 @@ scap_t* scap_open_udig_int(char *error, int32_t *rc,
 }
 #else
 
-static uint32_t get_max_consumers()
+static uint32_t get_max_consumers(const char *probe_name)
 {
 #ifndef _WIN32
 	uint32_t max;
 	FILE *pfile = fopen("/sys/module/" SCAP_KERNEL_MODULE_NAME "/parameters/max_consumers", "r");
+
+    char filename[SCAP_MAX_PATH_SIZE];
+    snprintf(filename, sizeof(filename), "/sys/module/%s/parameters/max_consumers", probe_name);
+
+    FILE *pfile = fopen(filename, "r");
 	if(pfile != NULL)
 	{
 		int w = fscanf(pfile, "%"PRIu32, &max);
@@ -164,7 +169,8 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 			   bool import_users,
 			   const char *bpf_probe,
 			   const char **suppressed_comms,
-			   interesting_ppm_sc_set *ppm_sc_of_interest)
+			   interesting_ppm_sc_set *ppm_sc_of_interest,
+               const char *arg_driver_name)
 {
 	uint32_t j;
 	char filename[SCAP_MAX_PATH_SIZE];
@@ -395,7 +401,8 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 			//
 			// Open the device
 			//
-			snprintf(filename, sizeof(filename), "%s/dev/" DRIVER_DEVICE_NAME "%d", scap_get_host_root(), all_scanned_devs);
+            const char *driver_name = (driver_probe_name == NULL ? DRIVER_DEVICE_NAME : arg_driver_name);
+            snprintf(filename, sizeof(filename), "%s/dev/%s%d", scap_get_host_root(), driver_name, all_scanned_devs);
 
 			if((handle->m_devs[j].m_fd = open(filename, O_RDWR | O_SYNC)) < 0)
 			{
@@ -408,12 +415,12 @@ scap_t* scap_open_live_int(char *error, int32_t *rc,
 				}
 				else if(errno == EBUSY)
 				{
-					uint32_t curr_max_consumers = get_max_consumers();
-					snprintf(error, SCAP_LASTERR_SIZE, "Too many consumers attached to device %s. Current value for /sys/module/" SCAP_KERNEL_MODULE_NAME "/parameters/max_consumers is '%"PRIu32"'.", filename, curr_max_consumers);
+					uint32_t curr_max_consumers = get_max_consumers(driver_name);
+					snprintf(error, SCAP_LASTERR_SIZE, "Too many consumers attached to device %s. Current value for /sys/module/%s/parameters/max_consumers is '%"PRIu32"'.", filename, driver_name, curr_max_consumers);
 				}
 				else
 				{
-					snprintf(error, SCAP_LASTERR_SIZE, "error opening device %s. Make sure you have root credentials and that the " DRIVER_NAME " module is loaded.", filename);
+					snprintf(error, SCAP_LASTERR_SIZE, "error opening device %s. Make sure you have root credentials and that the %s module is loaded.", filename, driver_name);
 				}
 
 				scap_close(handle);
@@ -964,7 +971,7 @@ scap_t* scap_open_offline_fd(int fd, char *error, int32_t *rc)
 
 scap_t* scap_open_live(char *error, int32_t *rc)
 {
-	return scap_open_live_int(error, rc, NULL, NULL, true, NULL, NULL, NULL);
+	return scap_open_live_int(error, rc, NULL, NULL, true, NULL, NULL, NULL, NULL);
 }
 
 scap_t* scap_open_nodriver_int(char *error, int32_t *rc,
@@ -1215,7 +1222,8 @@ scap_t* scap_open(scap_open_args args, char *error, int32_t *rc)
 						args.import_users,
 						args.bpf_probe,
 						args.suppressed_comms,
-						&args.ppm_sc_of_interest);
+						&args.ppm_sc_of_interest,
+                        args.fname);
 		}
 #else
 		snprintf(error,	SCAP_LASTERR_SIZE, "scap_open: live mode currently not supported on Windows.");
