@@ -142,10 +142,10 @@ static uint32_t get_max_consumers(const char *probe_name)
 	uint32_t max;
 	FILE *pfile = fopen("/sys/module/" SCAP_KERNEL_MODULE_NAME "/parameters/max_consumers", "r");
 
-    char filename[SCAP_MAX_PATH_SIZE];
-    snprintf(filename, sizeof(filename), "/sys/module/%s/parameters/max_consumers", probe_name);
+	char filename[SCAP_MAX_PATH_SIZE];
+	snprintf(filename, sizeof(filename), "/sys/module/%s/parameters/max_consumers", probe_name);
 
-    FILE *pfile = fopen(filename, "r");
+	FILE *pfile = fopen(filename, "r");
 	if(pfile != NULL)
 	{
 		int w = fscanf(pfile, "%"PRIu32, &max);
