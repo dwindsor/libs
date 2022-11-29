@@ -633,7 +633,7 @@ FILLER(sys_writev_pwritev_x, true)
 }
 
 static __always_inline int timespec_parse(struct filler_data *data,
-                                          unsigned long val)
+					  unsigned long val)
 {
 	u64 longtime;
 	struct timespec ts;
@@ -896,6 +896,29 @@ FILLER(sys_access_e, true)
 
 	return res;
 }
+
+FILLER(sys_access_x, true)
+{
+	unsigned long val;
+	unsigned long res;
+	unsigned long retval;
+
+       /*
+	* result
+	*/
+	retval = bpf_syscall_get_retval(data->ctx);
+	res = bpf_val_to_ring(data, retval);
+	if (res != PPM_SUCCESS)
+		return res;
+
+       /*
+	* pathname
+	*/
+	val = bpf_syscall_get_argument(data, 1);
+	res = bpf_val_to_ring(data, val);
+	return res;
+}
+
 
 FILLER(sys_getrlimit_setrlimit_e, true)
 {
@@ -2156,7 +2179,7 @@ FILLER(proc_startupdate, true)
 				data->buf[(data->state->tail_ctx.curoff + args_len - 1) & SCRATCH_SIZE_MAX] = 0;
 		}
 	} else if (data->state->tail_ctx.evt_type == PPME_SYSCALL_EXECVE_19_X ||
-	           data->state->tail_ctx.evt_type == PPME_SYSCALL_EXECVEAT_X ) {
+		   data->state->tail_ctx.evt_type == PPME_SYSCALL_EXECVEAT_X ) {
 		unsigned long val;
 		char **argv;
 
@@ -2477,7 +2500,7 @@ FILLER(proc_startupdate_3, true)
 		res = bpf_val_to_ring_type(data, vpid, PT_PID);
 
 	} else if (data->state->tail_ctx.evt_type == PPME_SYSCALL_EXECVE_19_X ||
-	           data->state->tail_ctx.evt_type == PPME_SYSCALL_EXECVEAT_X) {
+		   data->state->tail_ctx.evt_type == PPME_SYSCALL_EXECVEAT_X) {
 		/*
 		 * execve family parameters.
 		 */
@@ -4780,7 +4803,7 @@ FILLER(sys_signaldeliver_e, false)
 	} else if (sig == SIGKILL) {
 		spid = _READ(info->_sifields._kill._pid);
 	} else if (sig == SIGTERM || sig == SIGHUP || sig == SIGINT ||
-	           sig == SIGTSTP || sig == SIGQUIT) {
+		   sig == SIGTSTP || sig == SIGQUIT) {
 		int si_code = _READ(info->si_code);
 
 		if (si_code == SI_USER ||

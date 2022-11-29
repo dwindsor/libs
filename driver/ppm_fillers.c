@@ -6109,6 +6109,32 @@ int f_sys_access_e(struct event_filler_arguments *args)
 	return add_sentinel(args);
 }
 
+int f_sys_access_x(struct event_filler_arguments *args)
+{
+        unsigned long val;
+	int64_t retval;
+        int res;
+
+	/*
+	 * result
+	 */
+	retval = (int64_t)syscall_get_return_value(current, args->regs);
+        res = val_to_ring(args, retval, 0, false, 0);
+        if (unlikely(res != PPM_SUCCESS))
+                return res;
+
+
+        /*
+         * pathname
+         */
+        syscall_get_arguments_deprecated(current, args->regs, 1, 1, &val);
+        res = val_to_ring(args, access_flags_to_scap(val), 0, true, 0);
+        if (unlikely(res != PPM_SUCCESS))
+                return res;
+
+        return add_sentinel(args);
+}
+
 int f_sys_bpf_x(struct event_filler_arguments *args)
 {
 	int64_t retval;
