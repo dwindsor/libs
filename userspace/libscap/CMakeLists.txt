@@ -20,10 +20,7 @@ option(USE_BUNDLED_DEPS "Enable bundled dependencies instead of using the system
 option(BUILD_LIBSCAP_MODERN_BPF "Enable modern bpf probe" OFF)
 
 include(ExternalProject)
-
-if(WIN32 OR NOT MINIMAL_BUILD)
-	include(zlib)
-endif()
+include(zlib)
 
 add_definitions(-DPLATFORM_NAME="${CMAKE_SYSTEM_NAME}")
 
